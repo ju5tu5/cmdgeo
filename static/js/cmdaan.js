@@ -70,10 +70,16 @@ function _check_locations(event){
 		if(_calculate_distance(locatie, currentPosition)<locaties[i][2]){
 
 			// Controle of we NU op die locatie zijn, zo niet gaan we naar de betreffende page
-			if(window.location!=locaties[i][1]){
-// TODO: Opslaan dat de locatie bezocht is
-// TODO: Incrementeer locatie counter!!
+			if(window.location!=locaties[i][1] && localStorage[locaties[i][0]]=="false"){
+				// Probeer local storage, als die bestaat incrementeer de locatie
+				try {
+					(localStorage[locaties[i][0]]=="false")?localStorage[locaties[i][0]]=1:localStorage[locaties[i][0]]++;
+				} catch(error) {
+					debug_message("Localstorage kan niet aangesproken worden: "+error);
+				}
+
 // TODO: Animeer de betreffende marker
+
 				window.location = locaties[i][1];
 				debug_message("Speler is binnen een straal van "+ locaties[i][2] +" meter van "+locaties[i][0]);
 			}
@@ -111,7 +117,14 @@ function generate_map(myOptions, canvasId){
 	// Voeg de markers toe aan de map afhankelijk van het tourtype
 	debug_message("Locaties intekenen, tourtype is: "+tourType);
 	for (var i = 0; i < locaties.length; i++) {
-// TODO: Opslaan in local storage als die nog niet bestaat
+
+		// Met kudos aan Tomas Harkema, probeer local storage, als het bestaat, voeg de locaties toe
+		try {
+			(localStorage.visited==undefined)?localStorage[locaties[i][0]]=false:null;
+		} catch (error) {
+			debug_message("Localstorage kan niet aangesproken worden: "+error);
+		}
+
 	    var markerLatLng = new google.maps.LatLng(locaties[i][3], locaties[i][4]);
 	  	routeList.push(markerLatLng);
 
