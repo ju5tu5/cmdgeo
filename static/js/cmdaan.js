@@ -120,7 +120,7 @@ function generate_map(myOptions, canvasId){
 
 		// Met kudos aan Tomas Harkema, probeer local storage, als het bestaat, voeg de locaties toe
 		try {
-			(localStorage.visited==undefined)?localStorage[locaties[i][0]]=false:null;
+			(localStorage.visited==undefined||isNumber(localStorage.visited))?localStorage[locaties[i][0]]=false:null;
 		} catch (error) {
 			debug_message("Localstorage kan niet aangesproken worden: "+error);
 		}
@@ -166,6 +166,10 @@ function generate_map(myOptions, canvasId){
 
 	// Zorg dat de kaart geupdated wordt als het POSITION_UPDATED event afgevuurd wordt
 	ET.addListener(POSITION_UPDATED, update_positie);
+}
+
+function isNumber(n) {
+  return !isNaN(parseFloat(n)) && isFinite(n);
 }
 
 // Update de positie van de gebruiker op de kaart
