@@ -1,9 +1,10 @@
-# I Can Has Geo?
-It's a toolkit for creating geolocation and browser based tours used by Communication & Multimedia Design students @ University of Applied Science, Hogeschool van Amsterdam
+# cmdgeo
+It's a toolkit for creating geolocation and mobile browser based tours used by Communication & Multimedia Design students @ University of Applied Science, Hogeschool van Amsterdam. See http://cmdgeo.nl for more information.
 
-## TODO
-- Kan ik de google maps api asynchroon aangeroepen worden? dit scheelt calls	in de header
-- Opslaan in local storage als die nog niet bestaat
-- Kleur van de marker aanpassen op het huidige punt van de tour
-- Kleur van de route aanpassen op het huidige punt van de tour
-- Een HTML pagina openen als de locatiemarker verlaten wordt
+# Directories
+- *doc*: Generated documentation for cmdgeo.js (docco)
+- *example*: Several examples on how to use cmdgeo.js
+- *lib*: External libraries used by cmdgeo.js
+- *spike*: Programming tryouts and experiments
+- *style*: CSS stylesheets used on cmdgeo.nl
+- *test*: Tests for cmdgeo.js
