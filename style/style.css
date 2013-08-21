@@ -5,7 +5,7 @@ body {height: 100%;margin: 0;padding: 0;}
 
 /* Neatification */
 body {
-	background: url(/static/images/bg.png) top left repeat;
+	background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC4AAAAdCAMAAADiia4GAAAAJ1BMVEXb29vj4+Pm5ubk5OTd3d3g4ODc3Nzh4eHl5eXe3t7i4uLf3t7f399+XFm3AAABH0lEQVR42nXUCw6DIBAE0EEUFvT+5y3utJ3wM9FUebKAQ4Fw/I944kopt1/BH+eULpxRIEDcMkrk1XksyMbrggfvlzVyRc3eL2uEkduNm50QgC+rrecZpV0FUgM6CvLAk0qOR2htIy9W8NgC24PWNvHjqCnVSfPhih92ofQFrOCyY8V5f/ootUQnm2f+E3DBd0G15aqvke25Zmea955roYs+w8BZWBnwew5IKXjvyZmu9xQICioz9p7kniBOLS545NRdNf5wTt/k2sCNOf6uwAOOSmWt46YhcoY5dgFxJh7QxShiCMjE+xiR6/NPXFEQV7gmrs0qroBMXDESZ0A2XICc227LtQWda2g7rv8hVE18y7V0YFD05DbxFpSur1g+eZYPS/as5GIAAAAASUVORK5CYII=);
 	font-family: Garamond, serif;
 	color: #666666;
 }
