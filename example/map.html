@@ -2,11 +2,12 @@
 <html>
 <head>
 	<title>I Can Has Geo?</title>
-	<link href="static/css/style.css" rel="stylesheet" type="text/css" />
+	<link href="../style/style.css" rel="stylesheet" type="text/css" />
 
 	<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBnyib0uElbs0LNFobHjWhQMyTq-hiStEg&sensor=true&libraries=geometry"></script>
-	<script src="static/js/jquery-1.8.2.min.js" type="text/javascript"></script>
-	<script src="static/js/cmdaan.js" type="text/javascript"></script>
+	<script src="../lib/jquery-1.8.2.min.js" type="text/javascript"></script>
+	<script src="../lib/geo-min.js" type="text/javascript"></script>
+	<script src="../src/cmdgeo-0.1.js" type="text/javascript"></script>
 	<script type="text/javascript">
 
 		// Geef de opties voor de google maps kaart op, kijk voor een overzicht van alle opties op:
@@ -21,10 +22,10 @@
 			navigationControl: false,
 			mapTypeId: google.maps.MapTypeId.ROADMAP
 		};
-		
+
 		// Geef de opties voor de vorm van de markers, kijk voor een overzicht van alle opties op:
 		// https://developers.google.com/maps/documentation/javascript/3.exp/reference#MarkerShape
-		var locatieMarker = {		
+		var locatieMarker = {
 			path: google.maps.SymbolPath.CIRCLE,
 			fillColor: 'GhostWhite',
 			fillOpacity: .4,
@@ -63,12 +64,22 @@
 			init();
 
 			// Genereer een kaart (optioneel)
-			generate_map(kaartOpties, 'map_canvas');	
+			generate_map(kaartOpties, 'map_canvas');
 		}
 
 	</script>
 </head>
 <body>
+	<header>
+		<h1>cmdgeo</h1>
+		<p>Voorbeeld met google maps</p>
+	</header>
+
+	<nav>
+		<ul>
+			<li><a href="../index.html">voorpagina</a></li>
+		</ul>
+	</nav>
 
 	<div id="map_canvas" style="width:320px; height:350px"></div>
 
