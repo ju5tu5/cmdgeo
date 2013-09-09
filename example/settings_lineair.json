@@ -1,0 +1,28 @@
+{
+    "googleMapsKey": "AIzaSyBnyib0uElbs0LNFobHjWhQMyTq-hiStEg",
+    "tourType": "LINEAIR",
+    "poiList":[
+        {
+            "name": "Theo Thijssenhuis",
+            "description": "",
+            "coordinate": {
+                "latitude": 52.35955620231157,
+                "longitude": 4.908019635968003
+            },
+            "radius": 50,
+            "onEnter":"lineair_theothijssen.html",
+            "onExit":"lineair_naarbennopremsela.html"
+        },
+        {
+            "name": "Benno Premselahuis",
+            "description": "",
+            "coordinate": {
+                "latitude": 52.35981828737461,
+                "longitude": 4.909543130688462
+            },
+            "radius": 30,
+            "onEnter":"lineair_bennopremsela.html",
+            "onExit":"lineair_totziens.html"
+        }
+    ]
+}

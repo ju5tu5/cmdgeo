@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>cmdgeo-0.2.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>cmdgeo-0.2.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              <pre><code> cmdgeo-0.2.js
+ http://cmdgeo.nl
+ J.P. Sturkenboom &lt;j.p.sturkenboom@hva.nl&gt;
+ Copyleft 2013, all wrongs reversed.</code></pre>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>(<span class="keyword">function</span>() {
+    <span class="string">'use strict'</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>Create a default settings object, these are overrided once a settings file is loaded</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> defaultSettings = {
+        <span class="string">'googleMapsKey'</span>: <span class="string">''</span>,
+        <span class="string">'tourType'</span>: <span class="string">'LINEAIR'</span>,
+        <span class="string">'mapOptions'</span>: { <span class="string">'center'</span>: [<span class="number">52.35955620231157</span>, <span class="number">4.908019635968003</span>], <span class="string">'zoom'</span>: <span class="number">15</span>, <span class="string">'mapTypeId'</span>: <span class="string">'ROADMAP'</span> },
+        <span class="string">'poiMarker'</span>: { <span class="string">'path'</span>: <span class="string">'CIRCLE'</span>, <span class="string">'fillColor'</span>: <span class="string">'GhostWhite'</span>, <span class="string">'strokeColor'</span>: <span class="string">'FireBrick'</span> },
+        <span class="string">'posMarker'</span>: { <span class="string">'path'</span>: <span class="string">'BACKWARD_CLOSED_ARROW'</span>, <span class="string">'fillColor'</span>: <span class="string">'FireBrick'</span>, <span class="string">'strokeColor'</span>: <span class="string">'Black'</span> },
+        <span class="string">'poiList'</span> : []
+    };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>Create a safe reference to the cmdgeo object for use below.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> cmdgeo = <span class="keyword">function</span>(obj) {
+        <span class="keyword">if</span> (obj <span class="keyword">instanceof</span> cmdgeo) { <span class="keyword">return</span> obj; }
+        <span class="keyword">if</span> (!(<span class="keyword">this</span> <span class="keyword">instanceof</span> cmdgeo)) { <span class="keyword">return</span> <span class="keyword">new</span> cmdgeo(obj); }
+        <span class="keyword">this</span>.cmdgeowrapped = obj;
+    };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>Add cmdgeo as a global object</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>.cmdgeo = cmdgeo;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>Current version</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    cmdgeo.VERSION = <span class="number">0.2</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>Three vars we can&#39;t live without (or can we). cmdgeo.storage wil get a reference to
+either localStorage or sessionStorage through the function storageSupported()
+cmdgeo.settings wil be filled with the settings loaded externally through the
+function loadSettings(). They will be used as global vars by a lot of functions
+inside this module, this represents tight-coupling and i am aware of it.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    cmdgeo.storage = cmdgeo.settings = cmdgeo.map = <span class="literal">undefined</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>//////////////
+Predicates //
+//////////////</p>
+<p>Returns true if @x is not null</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">existy</span><span class="params">(x)</span> {</span>
+        <span class="keyword">return</span> x !== <span class="literal">null</span>;
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p>Returns true if @x is not false and not null</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">truthy</span><span class="params">(x)</span> {</span>
+        <span class="keyword">return</span> (x !== <span class="literal">false</span>) &amp;&amp; existy(x);
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p>Returns true if client-side storage is supported</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">storageSupported</span><span class="params">()</span> {</span>
+        <span class="keyword">return</span> <span class="keyword">typeof</span> Storage !== <span class="literal">undefined</span> ? cmdgeo.storage = sessionStorage : <span class="literal">false</span>;
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <p>Returns true if settings are loaded correctly</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">settingsLoaded</span><span class="params">()</span> {</span>
+        <span class="keyword">return</span> isDefined(cmdgeo.settings);
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <p>Returns true if we can use the geo API</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">gpsInitialized</span><span class="params">()</span> {</span>
+        <span class="keyword">return</span> geo_position_js.init();
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <p>Returns true if the passed variable is defined</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> isDefined = complement(_.isUndefined);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-13">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div>
+              <p>Returns true if @key is defined in storage</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">isDefinedInStorage</span><span class="params">(key)</span> {</span>
+        <span class="keyword">return</span> isDefined(cmdgeo.storage[key]);
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-14">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <p>Returns true if the name of @poi is defined in storage</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">poiInStorage</span><span class="params">(poi)</span> {</span>
+        <span class="keyword">return</span> isDefinedInStorage(poi.name);
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-15">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-15">&#182;</a>
+              </div>
+              <p>Returns the poi status (true/false)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">poiStatusInactive</span><span class="params">(poi)</span> {</span>
+        <span class="keyword">return</span> cmdgeo.storage.getItem(poi.name) === <span class="string">"false"</span>;
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-16">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-16">&#182;</a>
+              </div>
+              <p>Returns true if @poi has an onEnter string longer than zero</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">hasEnterTarget</span><span class="params">(poi)</span> {</span>
+        <span class="keyword">return</span> _.isString(poi.onEnter) &amp;&amp; poi.onEnter.length &gt; <span class="number">0</span>;
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-17">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-17">&#182;</a>
+              </div>
+              <p>Returns true if @poi has an onEnter string longer than zero</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">hasExitTarget</span><span class="params">(poi)</span> {</span>
+        <span class="keyword">return</span> isDefined(poi.onExit) &amp;&amp; _.isString(poi.onExit) &amp;&amp; poi.onExit.length &gt; <span class="number">0</span>;
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-18">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-18">&#182;</a>
+              </div>
+              <p>///////////
+Getters //
+///////////</p>
+<p>Use makeGetter() to create getter functions for the settings format</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> getPoiList = makeGetter(<span class="string">'poiList'</span>, defaultSettings);
+    <span class="keyword">var</span> getTourType = makeGetter(<span class="string">'tourType'</span>, defaultSettings);
+    <span class="keyword">var</span> getMapOptions = makeGetter(<span class="string">'mapOptions'</span>, defaultSettings);
+    <span class="keyword">var</span> getPoiMarker = makeGetter(<span class="string">'poiMarker'</span>, defaultSettings);
+    <span class="keyword">var</span> getPosMarker = makeGetter(<span class="string">'posMarker'</span>, defaultSettings);
+    <span class="keyword">var</span> getGoogleMapsKey = makeGetter(<span class="string">'googleMapsKey'</span>, defaultSettings);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-19">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-19">&#182;</a>
+              </div>
+              <p>////////////
+Checkers //
+////////////</p>
+<p>Test what happens when a checker fails</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> alwaysFail = validator(<span class="string">"Failing deliberately"</span>, always(<span class="literal">false</span>));</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-20">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-20">&#182;</a>
+              </div>
+              <p>Returns true if the settings file is formatted correctly
+Todo:
+check overall structure
+check tour type
+check for unique names on poi&#39;s
+check for url to go to on enter or on exit, or both</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> settingsFormatting = checker(
+
+    );</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-21">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-21">&#182;</a>
+              </div>
+              <p>Checks if requirements for storage are met</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> storageRequirements = checker(
+        validator(<span class="string">"Storage (localStorage/ sessionStorage) is not supported on your system, this app can't live without it."</span>, storageSupported)
+    );</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-22">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-22">&#182;</a>
+              </div>
+              <p>Checks if requirements for tracking are met</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> trackRequirements = checker(
+        validator(<span class="string">"Unable to find settings, did you load them before calling the track() function?."</span>, settingsLoaded),
+        validator(<span class="string">"Unable to initialise GPS, this app can't live without it."</span>, gpsInitialized)
+    );</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-23">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-23">&#182;</a>
+              </div>
+              <p>Checks if requirements to enter a @poi are met, requires @poi</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> canEnterPoi = checker(
+        validator(<span class="string">"Unable to find poi in storage, are you sure it's in your settings file?"</span>, poiInStorage),
+        validator(<span class="string">"The poi does not have an onEnter property."</span>, hasEnterTarget),
+        validator(<span class="string">"The poi has to be inactive!"</span>, poiStatusInactive)
+    );</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-24">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-24">&#182;</a>
+              </div>
+              <p>Checks if requirements to exit a @poi are met, requires @poi</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> canExitPoi = checker(
+        validator(<span class="string">"Unable to find poi in storage, are you sure it's in your settings file?"</span>, poiInStorage),
+        validator(<span class="string">"The poi does not have an onExit property."</span>, hasExitTarget)
+    );</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-25">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-25">&#182;</a>
+              </div>
+              <p>//////////////////
+Tour functions //
+//////////////////</p>
+<p>Loads an external settings file from @url</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    cmdgeo.loadSettings = <span class="function"><span class="keyword">function</span> <span class="title">loadSettings</span><span class="params">(url)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-26">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-26">&#182;</a>
+              </div>
+              <p>check if settings are loaded, set var in sessionStorage, dont&#39;t load when var is true</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        cmdgeo.settings = readFileContents(url);
+        errorDispatcher(settingsFormatting(cmdgeo.settings), fail);
+        populateStorage(cmdgeo.settings); <span class="comment">// this is too much for this function</span>
+    };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-27">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-27">&#182;</a>
+              </div>
+              <p>Returns the contents of an external file (json) as a string. We use a variable
+here because the request API works like this. (note: Can i make this functional?)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">readFileContents</span><span class="params">(url)</span> {</span>
+        <span class="keyword">var</span> request = chooseAppropriateRequestObject();
+        request.open(<span class="string">"GET"</span>, url, <span class="literal">false</span>);
+        request.send(<span class="literal">null</span>);
+        <span class="keyword">return</span> JSON.parse(request.responseText);
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-28">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-28">&#182;</a>
+              </div>
+              <p>Returns a request object that can read files based on the users browser environment</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">chooseAppropriateRequestObject</span><span class="params">()</span> {</span>
+        <span class="keyword">return</span> instantiateIfExists(window.XMLHttpRequest) || instantiateIfExists(window.ActiveXObject) || fail(<span class="string">"Your platform doesn't support HTTP request objects"</span>);
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-29">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-29">&#182;</a>
+              </div>
+              <p>Fill storage with the poi&#39;s from the settings file, the locations in storage
+are used to decide if we have to call the enter or exit properties of the poi</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">populateStorage</span><span class="params">(settings)</span> {</span>
+        errorDispatcher(storageRequirements(), fail);
+        _.each(getPoiList(settings), <span class="function"><span class="keyword">function</span> <span class="params">(poi)</span> {</span>
+            <span class="keyword">return</span> !(poi.name <span class="keyword">in</span> cmdgeo.storage) ? cmdgeo.storage.setItem(poi.name, <span class="literal">false</span>) : <span class="literal">false</span>;
+        });
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-30">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-30">&#182;</a>
+              </div>
+              <p>Fire up the GPS update interval if GPS is available or fail horribly if it&#39;s not</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    cmdgeo.track = <span class="function"><span class="keyword">function</span> <span class="title">track</span><span class="params">()</span> {</span>
+        errorDispatcher(trackRequirements(), fail);
+        updatePosition();
+    };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-31">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-31">&#182;</a>
+              </div>
+              <p>Returns the radian value of @deg</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">toRad</span><span class="params">(deg)</span> {</span>
+        <span class="keyword">return</span> deg * (Math.PI / <span class="number">180</span>);
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-32">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-32">&#182;</a>
+              </div>
+              <p>Returns the distance between two GPS locations in meters ignoring landmarks,
+the distance is &#39;as the crow flies&#39;. Calculated using the spherical law of
+cosines, 6376136 is the radius of earth in meters</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">distance</span><span class="params">(c1, c2)</span> {</span>
+        <span class="keyword">return</span> Math.acos(Math.sin(toRad(c1.latitude)) * Math.sin(toRad(c2.latitude)) + Math.cos(toRad(c1.latitude)) * Math.cos(toRad(c2.latitude)) * Math.cos(toRad(c2.longitude) - toRad(c1.longitude))) * <span class="number">6376136</span>;
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-33">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-33">&#182;</a>
+              </div>
+              <p>Call the update function from the geo.js API, it uses a callback structure</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">updatePosition</span><span class="params">()</span> {</span>
+        <span class="keyword">return</span> geo_position_js.getCurrentPosition(gotPosition, <span class="function"><span class="keyword">function</span> <span class="params">(c,m)</span> {</span> fail([<span class="string">"geo.js"</span>, c, m].join(<span class="string">' '</span>)); }, {enableHighAccuracy:<span class="literal">true</span>});
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-34">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-34">&#182;</a>
+              </div>
+              <p>Callback function that gets called by the update function from the geo.js API that our updatePosition() wraps</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">gotPosition</span><span class="params">(pos)</span> {</span>
+        setTimeout(updatePosition, <span class="number">500</span>);
+        <span class="keyword">if</span>(cmdgeo.map !== <span class="literal">undefined</span>) updateMap(pos);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-35">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-35">&#182;</a>
+              </div>
+              <p>this has got to be changed.. ugly as hell</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">var</span> poi = onPoi(pos.coords);
+        <span class="keyword">if</span>(poi) {
+            <span class="keyword">if</span>(poiStatusInactive(poi)) {
+                enterPoi(poi);
+            }
+        } <span class="keyword">else</span> {
+            poi = findActivePoi();
+            <span class="keyword">if</span>(poi) {
+                exitPoi(poi);
+            }
+        }
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-36">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-36">&#182;</a>
+              </div>
+              <p>Returns a poi if the current coordinate matches a POI&#39;s action-radius and false if there is no match</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">onPoi</span><span class="params">(coord)</span> {</span>
+        <span class="keyword">return</span> _.find(getPoiList(cmdgeo.settings), <span class="function"><span class="keyword">function</span> <span class="params">(poi)</span> {</span>
+            <span class="keyword">return</span> distance(coord, poi.coordinate) &lt; poi.radius;
+        }, <span class="literal">false</span>) || <span class="literal">false</span>;
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-37">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-37">&#182;</a>
+              </div>
+              <p>Checks if @poi has a valid onEnter object and activates it</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">enterPoi</span><span class="params">(poi)</span> {</span>
+        <span class="keyword">return</span> !errorDispatcher(canEnterPoi(poi), note) ? activatePoi(poi) : <span class="literal">undefined</span>;
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-38">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-38">&#182;</a>
+              </div>
+              <p>Checks if @poi has a valid onExit object and deactivates it</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">exitPoi</span><span class="params">(poi)</span> {</span>
+        <span class="keyword">return</span> !errorDispatcher(canExitPoi(poi), note) ? deactivatePoi(poi) : changePoiStatus(poi, <span class="literal">false</span>);
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-39">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-39">&#182;</a>
+              </div>
+              <p>Searches for an active poi in cmdgeo.storage, then searches for the
+corresponding settings from cmdgeo.settings and returns it all.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">findActivePoi</span><span class="params">()</span> {</span>
+        <span class="keyword">return</span> _.find(getPoiList(cmdgeo.settings), <span class="function"><span class="keyword">function</span> <span class="params">(poi)</span> {</span>
+            <span class="keyword">return</span> poi.name === _.find(_.keys(cmdgeo.storage), <span class="function"><span class="keyword">function</span> <span class="params">(key)</span> {</span>
+                <span class="keyword">return</span> cmdgeo.storage[key] === <span class="string">"true"</span>;
+            });
+        });
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-40">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-40">&#182;</a>
+              </div>
+              <p>Follows the onEnter url on @poi and sets its activity status to true</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">activatePoi</span><span class="params">(poi)</span> {</span>
+        changePoiStatus(poi, <span class="literal">true</span>);
+        window.location = poi.onEnter;
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-41">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-41">&#182;</a>
+              </div>
+              <p>Follows the onExit url on @poi and sets its activity status to false</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">deactivatePoi</span><span class="params">(poi)</span> {</span>
+        changePoiStatus(poi, <span class="literal">false</span>);
+        window.location = poi.onExit;
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-42">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-42">&#182;</a>
+              </div>
+              <p>Change the activity @status of @poi</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">changePoiStatus</span><span class="params">(poi, status)</span> {</span>
+        note(poi.name + (status ? <span class="string">" activated"</span> : <span class="string">" deactivated"</span>));
+        cmdgeo.storage.setItem(poi.name, status);
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-43">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-43">&#182;</a>
+              </div>
+              <p>///////////////////////////
+Google maps API wrapper //
+///////////////////////////</p>
+<p>Load the google maps API asynchronously when needed, it has a callback to the drawmap function</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    cmdgeo.loadmap = <span class="function"><span class="keyword">function</span> <span class="title">loadmap</span><span class="params">()</span> {</span>
+        <span class="keyword">var</span> script = document.createElement(<span class="string">'script'</span>);
+        script.src = <span class="string">'https://maps.googleapis.com/maps/api/js?v=3.exp&amp;sensor=true&amp;key='</span>+getGoogleMapsKey(cmdgeo.settings)+<span class="string">'&amp;callback=cmdgeo.drawmap'</span>;
+        document.body.appendChild(script);
+    };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-44">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-44">&#182;</a>
+              </div>
+              <p>Draws a google map on a HTML element with the id &#39;map_canvas&#39;</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    cmdgeo.drawmap = <span class="function"><span class="keyword">function</span> <span class="title">drawmap</span><span class="params">()</span> {</span>
+        formatSettings();
+        cmdgeo.map = <span class="keyword">new</span> google.maps.Map(document.getElementById(<span class="string">'map_canvas'</span>), getMapOptions(cmdgeo.settings));
+        drawroute();
+    };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-45">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-45">&#182;</a>
+              </div>
+              <p>Changes cmdgeo.settings to correspond with the google maps API (which wasn&#39;t loaded before )</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">formatSettings</span><span class="params">()</span> {</span>
+        cmdgeo.settings.mapOptions.center = <span class="keyword">new</span> google.maps.LatLng(cmdgeo.settings.mapOptions.center[<span class="number">0</span>], cmdgeo.settings.mapOptions.center[<span class="number">1</span>]);
+        cmdgeo.settings.mapOptions.mapTypeId = google.maps.MapTypeId[cmdgeo.settings.mapOptions.mapTypeId];
+        cmdgeo.settings.posMarker.path = google.maps.SymbolPath[cmdgeo.settings.posMarker.path];
+        cmdgeo.settings.poiMarker.path = google.maps.SymbolPath[cmdgeo.settings.poiMarker.path];
+    }
+
+    <span class="function"><span class="keyword">function</span> <span class="title">drawroute</span><span class="params">()</span> {</span>
+        cmdgeo.map.route = _.map(getPoiList(cmdgeo.settings), <span class="function"><span class="keyword">function</span> <span class="params">(poi)</span> {</span>
+            <span class="keyword">return</span> <span class="keyword">new</span> google.maps.LatLng(poi.coordinate.latitude, poi.coordinate.longitude);
+        });
+
+        cmdgeo.map.markers = _.map(getPoiList(cmdgeo.settings), <span class="function"><span class="keyword">function</span> <span class="params">(poi, i)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-46">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-46">&#182;</a>
+              </div>
+              <p>marker.scale = poi.radius / 3</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">return</span> <span class="keyword">new</span> google.maps.Marker({ position: cmdgeo.map.route[i], map: cmdgeo.map, icon: getPoiMarker(cmdgeo.settings), title: poi.name });
+        });</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-47">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-47">&#182;</a>
+              </div>
+              <p>TODO: Kleur aanpassen op het huidige punt van de tour</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">if</span>(getTourType(cmdgeo.settings) === <span class="string">"LINEAIR"</span>){</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-48">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-48">&#182;</a>
+              </div>
+              <p>Trek lijnen tussen de punten</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">var</span> route = <span class="keyword">new</span> google.maps.Polyline({
+                clickable: <span class="literal">false</span>,
+                map: cmdgeo.map,
+                path: cmdgeo.map.route,
+                strokeColor: <span class="string">'Black'</span>,
+                strokeOpacity: <span class="number">.6</span>,
+                strokeWeight: <span class="number">3</span>
+            });
+
+        }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-49">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-49">&#182;</a>
+              </div>
+              <p>Voeg de locatie van de persoon door</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        cmdgeo.map.pm = <span class="keyword">new</span> google.maps.Marker({position: getMapOptions(cmdgeo.settings).center, map: cmdgeo.map, icon: getPosMarker(cmdgeo.settings)});
+    };
+
+
+    <span class="function"><span class="keyword">function</span> <span class="title">updateMap</span><span class="params">(pos)</span> {</span>
+        cmdgeo.map.pm.setPosition(<span class="keyword">new</span> google.maps.LatLng(pos.coords.latitude, pos.coords.longitude));
+        cmdgeo.map.setCenter(cmdgeo.map.pm.position);
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-50">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-50">&#182;</a>
+              </div>
+              <p>////////////
+Messages //
+////////////</p>
+<p>Calls @fun when the length of @errs is bigger than zero, returns true if an error is dispatched and false if none is dispatched</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">errorDispatcher</span><span class="params">(errs, fun)</span> {</span>
+        <span class="keyword">return</span> errs.length &gt; <span class="number">0</span> ? !fun(errs) : <span class="literal">false</span>;
+    };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-51">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-51">&#182;</a>
+              </div>
+              <p>Three error levels to pass messages to the programmer</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">fail</span><span class="params">(thing)</span> {</span> <span class="keyword">throw</span> <span class="keyword">new</span> Error(thing); }
+    <span class="function"><span class="keyword">function</span> <span class="title">warn</span><span class="params">(thing)</span> {</span> console.log([<span class="string">"WARNING:"</span>, thing].join(<span class="string">' '</span>)); }
+    <span class="function"><span class="keyword">function</span> <span class="title">note</span><span class="params">(thing)</span> {</span> console.log([<span class="string">"NOTE:"</span>, thing].join(<span class="string">' '</span>)); }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-52">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-52">&#182;</a>
+              </div>
+              <p>//////////////////////////
+Higher order functions //
+//////////////////////////</p>
+<p>Always returns @val which is captured in a closure</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">always</span><span class="params">(val)</span> {</span>
+        <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+            <span class="keyword">return</span> val;
+        };
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-53">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-53">&#182;</a>
+              </div>
+              <p>Returns a collection of all values that don&#39;t belong to the results of @predicate.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">complement</span><span class="params">(predicate)</span> {</span>
+        <span class="keyword">return</span> <span class="keyword">function</span>() {
+            <span class="keyword">return</span> !predicate.apply(<span class="literal">null</span>, _.toArray(arguments));
+        };
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-54">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-54">&#182;</a>
+              </div>
+              <p>Calls the function @action1 when @condition is met and @action2 if it is not.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">doWhen</span><span class="params">(condition, action1, action2)</span> {</span>
+        <span class="keyword">return</span> truthy(condition) ? action1() : action2();
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-55">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-55">&#182;</a>
+              </div>
+              <p>Returns an instantiation of object @Target if it exists in the environment.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">instantiateIfExists</span><span class="params">(Target)</span> {</span>
+        <span class="keyword">return</span> doWhen(existy(Target), <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+            <span class="keyword">return</span> <span class="keyword">new</span> Target();
+        });
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-56">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-56">&#182;</a>
+              </div>
+              <p>Circumvents the execution of @fun, checks its incomming arguments for null
+or undefined, fills in the original defaults if either is found, and then
+calls the original with the patched args.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">fnull</span><span class="params">(fun <span class="comment">/*, defaults */</span>)</span> {</span>
+        <span class="keyword">var</span> defaults = _.rest(arguments);
+        <span class="keyword">return</span> <span class="keyword">function</span>(<span class="comment">/* arguments */</span>) {
+            <span class="keyword">return</span> fun.apply(<span class="literal">null</span>, _.map(arguments, <span class="keyword">function</span>(arg, i) {
+                <span class="keyword">return</span> existy(arg) ? arg : defaults[i];
+            }));
+        };
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-57">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-57">&#182;</a>
+              </div>
+              <p>Returns a function that searches for a @key in the object @obj,
+if it doesn&#39;t exist it returns the @key from the default object @def.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">defaults</span><span class="params">(def)</span> {</span>
+        <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> <span class="params">(obj, key)</span> {</span>
+            <span class="keyword">var</span> val = fnull(_.identity, def[key]);
+            <span class="keyword">return</span> obj &amp;&amp; val(obj[key]);
+        };
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-58">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-58">&#182;</a>
+              </div>
+              <p>Returns a getter function that searches for a @key in object @obj, if
+@key is not present in @obj the returned function will pass the value for
+@key from default object @def.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">makeGetter</span><span class="params">(key, def)</span> {</span>
+        <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> <span class="params">(obj)</span> {</span>
+            <span class="keyword">return</span> defaults(def)(obj, key);
+        };
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-59">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-59">&#182;</a>
+              </div>
+              <p>Create a chain of validators that will be pulled over a passed @obj,
+returns an empty array or one filled with the messages from the passed
+@validators.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">checker</span><span class="params">(<span class="comment">/* validators */</span>)</span> {</span>
+        <span class="keyword">var</span> validators = _.toArray(arguments);
+        <span class="keyword">return</span> <span class="keyword">function</span>(obj) {
+            <span class="keyword">return</span> _.reduce(validators, <span class="function"><span class="keyword">function</span> <span class="params">(errs, check)</span> {</span>
+                <span class="keyword">if</span> (check(obj)){
+                    <span class="keyword">return</span> errs;
+                }<span class="keyword">else</span>{
+                    <span class="keyword">return</span> _.chain(errs).push(check.message).value();
+                }
+            }, []);
+        };
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-60">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-60">&#182;</a>
+              </div>
+              <p>Create a validator function and the corresponding failure message.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">validator</span><span class="params">(message, fun)</span> {</span>
+        <span class="keyword">var</span> f = <span class="keyword">function</span>(<span class="comment">/* args */</span>) {
+            <span class="keyword">return</span> fun.apply(fun, arguments);
+        };
+        f.message = message;
+        <span class="keyword">return</span> f;
+    }
+
+}).call(<span class="keyword">this</span>);</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

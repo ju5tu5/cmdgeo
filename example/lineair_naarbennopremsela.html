@@ -12,24 +12,27 @@
 	<script type="text/javascript">
 
 	// Laad het settings bestand in
-	cmdgeo.loadSettings('settings_map.json');
+	cmdgeo.loadSettings('settings_lineair.json');
 
 	// Start met GPS-tracking
 	cmdgeo.track();
-
-	// Koppel het inladen van de google-maps kaart na het laden van de gehele pagina
-	window.onload = cmdgeo.loadmap;
 
 	</script>
 </head>
 <body>
 
-	<div id="map_canvas" style="width:100%; height:90%;"></div>
 	<nav>
 		<ul>
 			<li><a href="../index.html">voorpagina</a></li>
 		</ul>
 	</nav>
 
+	<section>
+		<article>
+			<h1>Benno Premselahuis</h1>
+			<p>Nu gaan we naar het BPH, steek de Wibautstraat over.</p>
+			<img src="./pics/bennopremselabuiten.jpeg" alt="Benno Premselahuis" />
+		</article>
+	</section>
 </body>
 </html>

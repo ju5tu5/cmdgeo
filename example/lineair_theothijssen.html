@@ -12,24 +12,27 @@
 	<script type="text/javascript">
 
 	// Laad het settings bestand in
-	cmdgeo.loadSettings('settings_map.json');
+	cmdgeo.loadSettings('settings_lineair.json');
 
 	// Start met GPS-tracking
 	cmdgeo.track();
-
-	// Koppel het inladen van de google-maps kaart na het laden van de gehele pagina
-	window.onload = cmdgeo.loadmap;
 
 	</script>
 </head>
 <body>
 
-	<div id="map_canvas" style="width:100%; height:90%;"></div>
 	<nav>
 		<ul>
 			<li><a href="../index.html">voorpagina</a></li>
 		</ul>
 	</nav>
 
+	<section>
+		<article>
+			<h1>Theo Thijssenhuis</h1>
+			<p>Welkom bij het Theo Thijssenhuis, hieronder een impressie van hoe het er binnen uit ziet.</p>
+			<img src="./pics/theothijssenbinnen.jpg" alt="Kohnstammhuis en Theo Thijssenhuis" />
+		</article>
+	</section>
 </body>
 </html>

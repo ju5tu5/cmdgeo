@@ -8,7 +8,7 @@
 
     // Create a default settings object, these are overrided once a settings file is loaded
     var defaultSettings = {
-        'googleMapsKey': 'AIzaSyBnyib0uElbs0LNFobHjWhQMyTq-hiStEg',
+        'googleMapsKey': '',
         'tourType': 'LINEAIR',
         'mapOptions': { 'center': [52.35955620231157, 4.908019635968003], 'zoom': 15, 'mapTypeId': 'ROADMAP' },
         'poiMarker': { 'path': 'CIRCLE', 'fillColor': 'GhostWhite', 'strokeColor': 'FireBrick' },
@@ -41,27 +41,27 @@
     ////////////////
 
     // Returns true if @x is not null
-    function existy (x) {
+    function existy(x) {
         return x !== null;
     }
 
     // Returns true if @x is not false and not null
-    function truthy (x) {
+    function truthy(x) {
         return (x !== false) && existy(x);
     }
 
     // Returns true if client-side storage is supported
-    function storageSupported () {
+    function storageSupported() {
         return typeof Storage !== undefined ? cmdgeo.storage = sessionStorage : false;
     }
 
     // Returns true if settings are loaded correctly
-    function settingsLoaded () {
+    function settingsLoaded() {
         return isDefined(cmdgeo.settings);
     }
 
     // Returns true if we can use the geo API
-    function gpsInitialized () {
+    function gpsInitialized() {
         return geo_position_js.init();
     }
 
@@ -69,12 +69,12 @@
     var isDefined = complement(_.isUndefined);
 
     // Returns true if @key is defined in storage
-    function isDefinedInStorage (key) {
+    function isDefinedInStorage(key) {
         return isDefined(cmdgeo.storage[key]);
     }
 
     // Returns true if the name of @poi is defined in storage
-    function poiInStorage (poi) {
+    function poiInStorage(poi) {
         return isDefinedInStorage(poi.name);
     }
 
@@ -151,7 +151,7 @@
     ////////////////////
 
     // Loads an external settings file from @url
-    cmdgeo.loadSettings = function loadSettings (url) {
+    cmdgeo.loadSettings = function loadSettings(url) {
         // check if settings are loaded, set var in sessionStorage, dont't load when var is true
         cmdgeo.settings = readFileContents(url);
         errorDispatcher(settingsFormatting(cmdgeo.settings), fail);
@@ -160,7 +160,7 @@
 
     // Returns the contents of an external file (json) as a string. We use a variable
     // here because the request API works like this. (note: Can i make this functional?)
-    function readFileContents (url) {
+    function readFileContents(url) {
         var request = chooseAppropriateRequestObject();
         request.open("GET", url, false);
         request.send(null);
@@ -182,30 +182,30 @@
     }
 
     // Fire up the GPS update interval if GPS is available or fail horribly if it's not
-    cmdgeo.track = function track () {
+    cmdgeo.track = function track() {
         errorDispatcher(trackRequirements(), fail);
         updatePosition();
     };
 
     // Returns the radian value of @deg
-    function toRad (deg) {
+    function toRad(deg) {
         return deg * (Math.PI / 180);
     }
 
     // Returns the distance between two GPS locations in meters ignoring landmarks,
     // the distance is 'as the crow flies'. Calculated using the spherical law of
     // cosines, 6376136 is the radius of earth in meters
-    function distance (c1, c2) {
+    function distance(c1, c2) {
         return Math.acos(Math.sin(toRad(c1.latitude)) * Math.sin(toRad(c2.latitude)) + Math.cos(toRad(c1.latitude)) * Math.cos(toRad(c2.latitude)) * Math.cos(toRad(c2.longitude) - toRad(c1.longitude))) * 6376136;
     }
 
     // Call the update function from the geo.js API, it uses a callback structure
-    function updatePosition () {
+    function updatePosition() {
         return geo_position_js.getCurrentPosition(gotPosition, function (c,m) { fail(["geo.js", c, m].join(' ')); }, {enableHighAccuracy:true});
     }
 
     // Callback function that gets called by the update function from the geo.js API that our updatePosition() wraps
-    function gotPosition (pos) {
+    function gotPosition(pos) {
         setTimeout(updatePosition, 500);
         if(cmdgeo.map !== undefined) updateMap(pos);
 
@@ -224,25 +224,25 @@
     }
 
     // Returns a poi if the current coordinate matches a POI's action-radius and false if there is no match
-    function onPoi (coord) {
+    function onPoi(coord) {
         return _.find(getPoiList(cmdgeo.settings), function (poi) {
             return distance(coord, poi.coordinate) < poi.radius;
         }, false) || false;
     }
 
     // Checks if @poi has a valid onEnter object and activates it
-    function enterPoi (poi) {
+    function enterPoi(poi) {
         return !errorDispatcher(canEnterPoi(poi), note) ? activatePoi(poi) : undefined;
     }
 
     // Checks if @poi has a valid onExit object and deactivates it
-    function exitPoi (poi) {
+    function exitPoi(poi) {
         return !errorDispatcher(canExitPoi(poi), note) ? deactivatePoi(poi) : changePoiStatus(poi, false);
     }
 
     // Searches for an active poi in cmdgeo.storage, then searches for the
     // corresponding settings from cmdgeo.settings and returns it all.
-    function findActivePoi () {
+    function findActivePoi() {
         return _.find(getPoiList(cmdgeo.settings), function (poi) {
             return poi.name === _.find(_.keys(cmdgeo.storage), function (key) {
                 return cmdgeo.storage[key] === "true";
@@ -251,19 +251,19 @@
     }
 
     // Follows the onEnter url on @poi and sets its activity status to true
-    function activatePoi (poi) {
+    function activatePoi(poi) {
         changePoiStatus(poi, true);
         window.location = poi.onEnter;
     }
 
     // Follows the onExit url on @poi and sets its activity status to false
-    function deactivatePoi (poi) {
+    function deactivatePoi(poi) {
         changePoiStatus(poi, false);
         window.location = poi.onExit;
     }
 
     // Change the activity @status of @poi
-    function changePoiStatus (poi, status) {
+    function changePoiStatus(poi, status) {
         note(poi.name + (status ? " activated" : " deactivated"));
         cmdgeo.storage.setItem(poi.name, status);
     }
@@ -273,28 +273,28 @@
     /////////////////////////////
 
     // Load the google maps API asynchronously when needed, it has a callback to the drawmap function
-    cmdgeo.loadmap = function loadmap () {
+    cmdgeo.loadmap = function loadmap() {
         var script = document.createElement('script');
         script.src = 'https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=true&key='+getGoogleMapsKey(cmdgeo.settings)+'&callback=cmdgeo.drawmap';
         document.body.appendChild(script);
     };
 
     // Draws a google map on a HTML element with the id 'map_canvas'
-    cmdgeo.drawmap = function drawmap () {
+    cmdgeo.drawmap = function drawmap() {
         formatSettings();
         cmdgeo.map = new google.maps.Map(document.getElementById('map_canvas'), getMapOptions(cmdgeo.settings));
         drawroute();
     };
 
     // Changes cmdgeo.settings to correspond with the google maps API (which wasn't loaded before )
-    function formatSettings () {
+    function formatSettings() {
         cmdgeo.settings.mapOptions.center = new google.maps.LatLng(cmdgeo.settings.mapOptions.center[0], cmdgeo.settings.mapOptions.center[1]);
         cmdgeo.settings.mapOptions.mapTypeId = google.maps.MapTypeId[cmdgeo.settings.mapOptions.mapTypeId];
         cmdgeo.settings.posMarker.path = google.maps.SymbolPath[cmdgeo.settings.posMarker.path];
         cmdgeo.settings.poiMarker.path = google.maps.SymbolPath[cmdgeo.settings.poiMarker.path];
     }
 
-    function drawroute () {
+    function drawroute() {
         cmdgeo.map.route = _.map(getPoiList(cmdgeo.settings), function (poi) {
             return new google.maps.LatLng(poi.coordinate.latitude, poi.coordinate.longitude);
         });
@@ -322,9 +322,9 @@
     };
 
 
-    function updateMap (pos) {
+    function updateMap(pos) {
         cmdgeo.map.pm.setPosition(new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude));
-        //cmdgeo.map.setCenter(cmdgeo.map.pm.position);
+        cmdgeo.map.setCenter(cmdgeo.map.pm.position);
     }
 
     //////////////
@@ -332,40 +332,40 @@
     //////////////
 
     // Calls @fun when the length of @errs is bigger than zero, returns true if an error is dispatched and false if none is dispatched
-    function errorDispatcher (errs, fun) {
+    function errorDispatcher(errs, fun) {
         return errs.length > 0 ? !fun(errs) : false;
     };
 
     // Three error levels to pass messages to the programmer
-    function fail (thing) { throw new Error(thing); }
-    function warn (thing) { console.log(["WARNING:", thing].join(' ')); }
-    function note (thing) { console.log(["NOTE:", thing].join(' ')); }
+    function fail(thing) { throw new Error(thing); }
+    function warn(thing) { console.log(["WARNING:", thing].join(' ')); }
+    function note(thing) { console.log(["NOTE:", thing].join(' ')); }
 
     ////////////////////////////
     // Higher order functions //
     ////////////////////////////
 
     // Always returns @val which is captured in a closure
-    function always (val) {
+    function always(val) {
         return function () {
             return val;
         };
     }
 
     // Returns a collection of all values that don't belong to the results of @predicate.
-    function complement (predicate) {
+    function complement(predicate) {
         return function() {
             return !predicate.apply(null, _.toArray(arguments));
         };
     }
 
     // Calls the function @action1 when @condition is met and @action2 if it is not.
-    function doWhen (condition, action1, action2) {
+    function doWhen(condition, action1, action2) {
         return truthy(condition) ? action1() : action2();
     }
 
     // Returns an instantiation of object @Target if it exists in the environment.
-    function instantiateIfExists (Target) {
+    function instantiateIfExists(Target) {
         return doWhen(existy(Target), function () {
             return new Target();
         });
@@ -374,7 +374,7 @@
     // Circumvents the execution of @fun, checks its incomming arguments for null
     // or undefined, fills in the original defaults if either is found, and then
     // calls the original with the patched args.
-    function fnull (fun /*, defaults */) {
+    function fnull(fun /*, defaults */) {
         var defaults = _.rest(arguments);
         return function(/* arguments */) {
             return fun.apply(null, _.map(arguments, function(arg, i) {
@@ -385,7 +385,7 @@
 
     // Returns a function that searches for a @key in the object @obj,
     // if it doesn't exist it returns the @key from the default object @def.
-    function defaults (def) {
+    function defaults(def) {
         return function (obj, key) {
             var val = fnull(_.identity, def[key]);
             return obj && val(obj[key]);
@@ -418,7 +418,7 @@
     }
 
     // Create a validator function and the corresponding failure message.
-    function validator (message, fun) {
+    function validator(message, fun) {
         var f = function(/* args */) {
             return fun.apply(fun, arguments);
         };
