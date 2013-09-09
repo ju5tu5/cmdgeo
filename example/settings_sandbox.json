@@ -38,7 +38,7 @@
                 "longitude": 4.920969341091904
             },
             "radius": 10,
-            "onEnter":"sandbox_kit_enter.html",
+            "onEnter":"sandbox_kit.html",
             "onExit":"sandbox_index.html"
         },
         {
@@ -49,7 +49,7 @@
                 "longitude": 4.912826154522691
             },
             "radius": 30,
-            "onEnter":"sandbox_crea_enter.html",
+            "onEnter":"sandbox_crea.html",
             "onExit":"sandbox_index.html"
         }
     ]
