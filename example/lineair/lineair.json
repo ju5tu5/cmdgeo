@@ -10,8 +10,8 @@
                 "longitude": 4.908019635968003
             },
             "radius": 50,
-            "onEnter":"lineair_theothijssen.html",
-            "onExit":"lineair_naarbennopremsela.html"
+            "onEnter":"theothijssen.html",
+            "onExit":"naarbennopremsela.html"
         },
         {
             "name": "Benno Premselahuis",
@@ -21,8 +21,8 @@
                 "longitude": 4.909543130688462
             },
             "radius": 30,
-            "onEnter":"lineair_bennopremsela.html",
-            "onExit":"lineair_totziens.html"
+            "onEnter":"bennopremsela.html",
+            "onExit":"totziens.html"
         }
     ]
 }

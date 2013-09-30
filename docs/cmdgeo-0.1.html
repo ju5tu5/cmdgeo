@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>cmdgeo-0.1.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>cmdgeo-0.1.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="comment">/***
+* cmdaan.js
+*   Bevat functies voor CMDAan stijl geolocatie welke uitgelegd
+*   zijn tijdens het techniek college in week 5.
+*
+*   Author: J.P. Sturkenboom &lt;j.p.sturkenboom@hva.nl&gt;
+*   Credit: Dive into html5, geo.js, Nicholas C. Zakas
+*
+*   Copyleft 2012, all wrongs reversed.
+*/</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>Variable declaration</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> SANDBOX = <span class="string">"SANDBOX"</span>;
+<span class="keyword">var</span> LINEAIR = <span class="string">"LINEAIR"</span>;
+<span class="keyword">var</span> GPS_AVAILABLE = <span class="string">'GPS_AVAILABLE'</span>;
+<span class="keyword">var</span> GPS_UNAVAILABLE = <span class="string">'GPS_UNAVAILABLE'</span>;
+<span class="keyword">var</span> POSITION_UPDATED = <span class="string">'POSITION_UPDATED'</span>;
+<span class="keyword">var</span> REFRESH_RATE = <span class="number">1000</span>;
+<span class="keyword">var</span> currentPosition = currentPositionMarker = customDebugging = debugId = map = interval =intervalCounter = updateMap = <span class="literal">false</span>;
+<span class="keyword">var</span> locatieRij = markerRij = [];</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>Event functies - bron: <a href="http://www.nczonline.net/blog/2010/03/09/custom-events-in-javascript/">http://www.nczonline.net/blog/2010/03/09/custom-events-in-javascript/</a> Copyright (c) 2010 Nicholas C. Zakas. All rights reserved. MIT License
+Gebruik: ET.addListener(&#39;foo&#39;, handleEvent); ET.fire(&#39;event_name&#39;); ET.removeListener(&#39;foo&#39;, handleEvent);</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">EventTarget</span><span class="params">()</span>{</span><span class="keyword">this</span>._listeners={}}
+EventTarget.prototype={constructor:EventTarget,addListener:<span class="keyword">function</span>(a,c){<span class="string">"undefined"</span>==<span class="keyword">typeof</span> <span class="keyword">this</span>._listeners[a]&amp;&amp;(<span class="keyword">this</span>._listeners[a]=[]);<span class="keyword">this</span>._listeners[a].push(c)},fire:<span class="keyword">function</span>(a){<span class="string">"string"</span>==<span class="keyword">typeof</span> a&amp;&amp;(a={type:a});a.target||(a.target=<span class="keyword">this</span>);<span class="keyword">if</span>(!a.type)<span class="keyword">throw</span> Error(<span class="string">"Event object missing 'type' property."</span>);<span class="keyword">if</span>(<span class="keyword">this</span>._listeners[a.type]<span class="keyword">instanceof</span> Array)<span class="keyword">for</span>(<span class="keyword">var</span> c=<span class="keyword">this</span>._listeners[a.type],b=<span class="number">0</span>,d=c.length;b&lt;d;b++)c[b].call(<span class="keyword">this</span>,a)},removeListener:<span class="keyword">function</span>(a,c){<span class="keyword">if</span>(<span class="keyword">this</span>._listeners[a]<span class="keyword">instanceof</span> Array)<span class="keyword">for</span>(<span class="keyword">var</span> b=
+<span class="keyword">this</span>._listeners[a],d=<span class="number">0</span>,e=b.length;d&lt;e;d++)<span class="keyword">if</span>(b[d]===c){b.splice(d,<span class="number">1</span>);<span class="keyword">break</span>}}}; <span class="keyword">var</span> ET = <span class="keyword">new</span> EventTarget();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>Test of GPS beschikbaar is (via geo.js) en vuur een event af</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">init</span><span class="params">()</span>{</span>
+    debug_message(<span class="string">"Controleer of GPS beschikbaar is..."</span>);
+
+    ET.addListener(GPS_AVAILABLE, _start_interval);
+    ET.addListener(GPS_UNAVAILABLE, <span class="keyword">function</span>(){debug_message(<span class="string">'GPS is niet beschikbaar.'</span>)});
+
+    (geo_position_js.init())?ET.fire(GPS_AVAILABLE):ET.fire(GPS_UNAVAILABLE);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>Start een interval welke op basis van REFRESH_RATE de positie updated</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">_start_interval</span><span class="params">(event)</span>{</span>
+    debug_message(<span class="string">"GPS is beschikbaar, vraag positie."</span>);
+    _update_position();
+    interval = self.setInterval(_update_position, REFRESH_RATE);
+    ET.addListener(POSITION_UPDATED, _check_locations);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>Vraag de huidige positie aan geo.js, stel een callback in voor het resultaat</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">_update_position</span><span class="params">()</span>{</span>
+    intervalCounter++;
+    geo_position_js.getCurrentPosition(_set_position, _geo_error_handler, {enableHighAccuracy:<span class="literal">true</span>});
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>Callback functie voor het instellen van de huidige positie, vuurt een event af</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">_set_position</span><span class="params">(position)</span>{</span>
+    currentPosition = position;
+    ET.fire(<span class="string">"POSITION_UPDATED"</span>);
+    debug_message(intervalCounter+<span class="string">" positie lat:"</span>+position.coords.latitude+<span class="string">" long:"</span>+position.coords.longitude);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p>Controleer de locaties en verwijs naar een andere pagina als we op een locatie zijn</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">_check_locations</span><span class="params">(event)</span>{</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p>Liefst buiten google maps om... maar helaas, ze hebben alle coole functies</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; locaties.length; i++) {
+        <span class="keyword">var</span> locatie = {coords:{latitude: locaties[i][<span class="number">3</span>],longitude: locaties[i][<span class="number">4</span>]}};
+
+        <span class="keyword">if</span>(_calculate_distance(locatie, currentPosition)&lt;locaties[i][<span class="number">2</span>]){</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <p>Controle of we NU op die locatie zijn, zo niet gaan we naar de betreffende page</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">if</span>(window.location!=locaties[i][<span class="number">1</span>] &amp;&amp; localStorage[locaties[i][<span class="number">0</span>]]==<span class="string">"false"</span>){</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <p>Probeer local storage, als die bestaat incrementeer de locatie</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                <span class="keyword">try</span> {
+                    (localStorage[locaties[i][<span class="number">0</span>]]==<span class="string">"false"</span>)?localStorage[locaties[i][<span class="number">0</span>]]=<span class="number">1</span>:localStorage[locaties[i][<span class="number">0</span>]]++;
+                } <span class="keyword">catch</span>(error) {
+                    debug_message(<span class="string">"Localstorage kan niet aangesproken worden: "</span>+error);
+                }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <p>TODO: Animeer de betreffende marker</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                window.location = locaties[i][<span class="number">1</span>];
+                debug_message(<span class="string">"Speler is binnen een straal van "</span>+ locaties[i][<span class="number">2</span>] +<span class="string">" meter van "</span>+locaties[i][<span class="number">0</span>]);
+            }
+        }
+    }
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-13">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div>
+              <p>Bereken het verchil in meters tussen twee punten</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">_calculate_distance</span><span class="params">(p1, p2)</span>{</span>
+    <span class="keyword">var</span> pos1 = <span class="keyword">new</span> google.maps.LatLng(p1.coords.latitude, p1.coords.longitude);
+    <span class="keyword">var</span> pos2 = <span class="keyword">new</span> google.maps.LatLng(p2.coords.latitude, p2.coords.longitude);
+    <span class="keyword">return</span> Math.round(google.maps.geometry.spherical.computeDistanceBetween(pos1, pos2), <span class="number">0</span>);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-14">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <p>GOOGLE MAPS FUNCTIES</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="comment">/**
+ * generate_map(myOptions, canvasId)
+ *  roept op basis van meegegeven opties de google maps API aan
+ *  om een kaart te genereren en plaatst deze in het HTML element
+ *  wat aangeduid wordt door het meegegeven id.
+ *
+ *  @param myOptions:object - een object met in te stellen opties
+ *      voor de aanroep van de google maps API, kijk voor een over-
+ *      zicht van mogelijke opties op http://
+ *  @param canvasID:string - het id van het HTML element waar de
+ *      kaart in ge-rendered moet worden, &lt;div&gt; of &lt;canvas&gt;
+ */</span>
+<span class="function"><span class="keyword">function</span> <span class="title">generate_map</span><span class="params">(myOptions, canvasId)</span>{</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-15">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-15">&#182;</a>
+              </div>
+              <p>TODO: Kan ik hier asynchroon nog de google maps api aanroepen? dit scheelt calls</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    debug_message(<span class="string">"Genereer een Google Maps kaart en toon deze in #"</span>+canvasId)
+    map = <span class="keyword">new</span> google.maps.Map(document.getElementById(canvasId), myOptions);
+
+    <span class="keyword">var</span> routeList = [];</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-16">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-16">&#182;</a>
+              </div>
+              <p>Voeg de markers toe aan de map afhankelijk van het tourtype</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    debug_message(<span class="string">"Locaties intekenen, tourtype is: "</span>+tourType);
+    <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; locaties.length; i++) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-17">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-17">&#182;</a>
+              </div>
+              <p>Met kudos aan Tomas Harkema, probeer local storage, als het bestaat, voeg de locaties toe</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">try</span> {
+            (localStorage.visited==<span class="literal">undefined</span>||isNumber(localStorage.visited))?localStorage[locaties[i][<span class="number">0</span>]]=<span class="literal">false</span>:<span class="literal">null</span>;
+        } <span class="keyword">catch</span> (error) {
+            debug_message(<span class="string">"Localstorage kan niet aangesproken worden: "</span>+error);
+        }
+
+        <span class="keyword">var</span> markerLatLng = <span class="keyword">new</span> google.maps.LatLng(locaties[i][<span class="number">3</span>], locaties[i][<span class="number">4</span>]);
+        routeList.push(markerLatLng);
+
+        markerRij[i] = {};
+        <span class="keyword">for</span> (<span class="keyword">var</span> attr <span class="keyword">in</span> locatieMarker) {
+            markerRij[i][attr] = locatieMarker[attr];
+        }
+        markerRij[i].scale = locaties[i][<span class="number">2</span>]/<span class="number">3</span>;
+
+        <span class="keyword">var</span> marker = <span class="keyword">new</span> google.maps.Marker({
+            position: markerLatLng,
+            map: map,
+            icon: markerRij[i],
+            title: locaties[i][<span class="number">0</span>]
+        });
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-18">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-18">&#182;</a>
+              </div>
+              <p>TODO: Kleur aanpassen op het huidige punt van de tour</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">if</span>(tourType == LINEAIR){</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-19">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-19">&#182;</a>
+              </div>
+              <p>Trek lijnen tussen de punten</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        debug_message(<span class="string">"Route intekenen"</span>);
+        <span class="keyword">var</span> route = <span class="keyword">new</span> google.maps.Polyline({
+            clickable: <span class="literal">false</span>,
+            map: map,
+            path: routeList,
+            strokeColor: <span class="string">'Black'</span>,
+            strokeOpacity: <span class="number">.6</span>,
+            strokeWeight: <span class="number">3</span>
+        });
+
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-20">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-20">&#182;</a>
+              </div>
+              <p>Voeg de locatie van de persoon door</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    currentPositionMarker = <span class="keyword">new</span> google.maps.Marker({
+        position: kaartOpties.center,
+        map: map,
+        icon: positieMarker,
+        title: <span class="string">'U bevindt zich hier'</span>
+    });</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-21">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-21">&#182;</a>
+              </div>
+              <p>Zorg dat de kaart geupdated wordt als het POSITION_UPDATED event afgevuurd wordt</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    ET.addListener(POSITION_UPDATED, update_positie);
+}
+
+<span class="function"><span class="keyword">function</span> <span class="title">isNumber</span><span class="params">(n)</span> {</span>
+  <span class="keyword">return</span> !isNaN(parseFloat(n)) &amp;&amp; isFinite(n);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-22">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-22">&#182;</a>
+              </div>
+              <p>Update de positie van de gebruiker op de kaart</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">update_positie</span><span class="params">(event)</span>{</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-23">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-23">&#182;</a>
+              </div>
+              <p>use currentPosition to center the map</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> newPos = <span class="keyword">new</span> google.maps.LatLng(currentPosition.coords.latitude, currentPosition.coords.longitude);
+    map.setCenter(newPos);
+    currentPositionMarker.setPosition(newPos);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-24">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-24">&#182;</a>
+              </div>
+              <p>FUNCTIES VOOR DEBUGGING</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">_geo_error_handler</span><span class="params">(code, message)</span> {</span>
+    debug_message(<span class="string">'geo.js error '</span>+code+<span class="string">': '</span>+message);
+}
+<span class="function"><span class="keyword">function</span> <span class="title">debug_message</span><span class="params">(message)</span>{</span>
+    (customDebugging &amp;&amp; debugId)?document.getElementById(debugId).innerHTML:console.log(message);
+}
+<span class="function"><span class="keyword">function</span> <span class="title">set_custom_debugging</span><span class="params">(debugId)</span>{</span>
+    debugId = <span class="keyword">this</span>.debugId;
+    customDebugging = <span class="literal">true</span>;
+}</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

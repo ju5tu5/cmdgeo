@@ -847,14 +847,7 @@ Google maps API wrapper //
         cmdgeo.settings.mapOptions.mapTypeId = google.maps.MapTypeId[cmdgeo.settings.mapOptions.mapTypeId];
         cmdgeo.settings.posMarker.path = google.maps.SymbolPath[cmdgeo.settings.posMarker.path];
         cmdgeo.settings.poiMarker.path = google.maps.SymbolPath[cmdgeo.settings.poiMarker.path];
-    }
-
-    <span class="function"><span class="keyword">function</span> <span class="title">drawroute</span><span class="params">()</span> {</span>
-        cmdgeo.map.route = _.map(getPoiList(cmdgeo.settings), <span class="function"><span class="keyword">function</span> <span class="params">(poi)</span> {</span>
-            <span class="keyword">return</span> <span class="keyword">new</span> google.maps.LatLng(poi.coordinate.latitude, poi.coordinate.longitude);
-        });
-
-        cmdgeo.map.markers = _.map(getPoiList(cmdgeo.settings), <span class="function"><span class="keyword">function</span> <span class="params">(poi, i)</span> {</span></pre></div></div>
+    }</pre></div></div>
             
         </li>
         
@@ -865,12 +858,11 @@ Google maps API wrapper //
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-46">&#182;</a>
               </div>
-              <p>marker.scale = poi.radius / 3</p>
+              <p>Draw the route on the map, this function needs some extra work</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>            <span class="keyword">return</span> <span class="keyword">new</span> google.maps.Marker({ position: cmdgeo.map.route[i], map: cmdgeo.map, icon: getPoiMarker(cmdgeo.settings), title: poi.name });
-        });</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">drawroute</span><span class="params">()</span> {</span></pre></div></div>
             
         </li>
         
@@ -881,11 +873,13 @@ Google maps API wrapper //
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-47">&#182;</a>
               </div>
-              <p>TODO: Kleur aanpassen op het huidige punt van de tour</p>
+              <p>Add poi&#39;s to the route</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        <span class="keyword">if</span>(getTourType(cmdgeo.settings) === <span class="string">"LINEAIR"</span>){</pre></div></div>
+            <div class="content"><div class='highlight'><pre>        cmdgeo.map.route = _.map(getPoiList(cmdgeo.settings), <span class="function"><span class="keyword">function</span> <span class="params">(poi)</span> {</span>
+            <span class="keyword">return</span> <span class="keyword">new</span> google.maps.LatLng(poi.coordinate.latitude, poi.coordinate.longitude);
+        });</pre></div></div>
             
         </li>
         
@@ -896,20 +890,13 @@ Google maps API wrapper //
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-48">&#182;</a>
               </div>
-              <p>Trek lijnen tussen de punten</p>
+              <p>Add markers to the poi&#39;s</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>            <span class="keyword">var</span> route = <span class="keyword">new</span> google.maps.Polyline({
-                clickable: <span class="literal">false</span>,
-                map: cmdgeo.map,
-                path: cmdgeo.map.route,
-                strokeColor: <span class="string">'Black'</span>,
-                strokeOpacity: <span class="number">.6</span>,
-                strokeWeight: <span class="number">3</span>
-            });
-
-        }</pre></div></div>
+            <div class="content"><div class='highlight'><pre>        cmdgeo.map.markers = _.map(getPoiList(cmdgeo.settings), <span class="function"><span class="keyword">function</span> <span class="params">(poi, i)</span> {</span>
+            <span class="keyword">return</span> <span class="keyword">new</span> google.maps.Marker({ position: cmdgeo.map.route[i], map: cmdgeo.map, icon: getPoiMarker(cmdgeo.settings), title: poi.name });
+        });</pre></div></div>
             
         </li>
         
@@ -920,7 +907,24 @@ Google maps API wrapper //
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-49">&#182;</a>
               </div>
-              <p>Voeg de locatie van de persoon door</p>
+              <p>Draw lines between the poi&#39;s when this is a lineair route, the lines are as the crow flies</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">if</span>(getTourType(cmdgeo.settings) === <span class="string">"LINEAIR"</span>){
+            <span class="keyword">var</span> route = <span class="keyword">new</span> google.maps.Polyline({ clickable: <span class="literal">false</span>, map: cmdgeo.map, path: cmdgeo.map.route, strokeColor: <span class="string">'Black'</span>, strokeOpacity: <span class="number">.6</span>, strokeWeight: <span class="number">3</span> });
+        }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-50">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-50">&#182;</a>
+              </div>
+              <p>Add the position marker</p>
 
             </div>
             
@@ -936,11 +940,11 @@ Google maps API wrapper //
         </li>
         
         
-        <li id="section-50">
+        <li id="section-51">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-50">&#182;</a>
+                <a class="pilcrow" href="#section-51">&#182;</a>
               </div>
               <p>////////////
 Messages //
@@ -956,11 +960,11 @@ Messages //
         </li>
         
         
-        <li id="section-51">
+        <li id="section-52">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-51">&#182;</a>
+                <a class="pilcrow" href="#section-52">&#182;</a>
               </div>
               <p>Three error levels to pass messages to the programmer</p>
 
@@ -973,11 +977,11 @@ Messages //
         </li>
         
         
-        <li id="section-52">
+        <li id="section-53">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-52">&#182;</a>
+                <a class="pilcrow" href="#section-53">&#182;</a>
               </div>
               <p>//////////////////////////
 Higher order functions //
@@ -995,11 +999,11 @@ Higher order functions //
         </li>
         
         
-        <li id="section-53">
+        <li id="section-54">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-53">&#182;</a>
+                <a class="pilcrow" href="#section-54">&#182;</a>
               </div>
               <p>Returns a collection of all values that don&#39;t belong to the results of @predicate.</p>
 
@@ -1014,11 +1018,11 @@ Higher order functions //
         </li>
         
         
-        <li id="section-54">
+        <li id="section-55">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-54">&#182;</a>
+                <a class="pilcrow" href="#section-55">&#182;</a>
               </div>
               <p>Calls the function @action1 when @condition is met and @action2 if it is not.</p>
 
@@ -1031,11 +1035,11 @@ Higher order functions //
         </li>
         
         
-        <li id="section-55">
+        <li id="section-56">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-55">&#182;</a>
+                <a class="pilcrow" href="#section-56">&#182;</a>
               </div>
               <p>Returns an instantiation of object @Target if it exists in the environment.</p>
 
@@ -1050,11 +1054,11 @@ Higher order functions //
         </li>
         
         
-        <li id="section-56">
+        <li id="section-57">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-56">&#182;</a>
+                <a class="pilcrow" href="#section-57">&#182;</a>
               </div>
               <p>Circumvents the execution of @fun, checks its incomming arguments for null
 or undefined, fills in the original defaults if either is found, and then
@@ -1074,11 +1078,11 @@ calls the original with the patched args.</p>
         </li>
         
         
-        <li id="section-57">
+        <li id="section-58">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-57">&#182;</a>
+                <a class="pilcrow" href="#section-58">&#182;</a>
               </div>
               <p>Returns a function that searches for a @key in the object @obj,
 if it doesn&#39;t exist it returns the @key from the default object @def.</p>
@@ -1095,11 +1099,11 @@ if it doesn&#39;t exist it returns the @key from the default object @def.</p>
         </li>
         
         
-        <li id="section-58">
+        <li id="section-59">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-58">&#182;</a>
+                <a class="pilcrow" href="#section-59">&#182;</a>
               </div>
               <p>Returns a getter function that searches for a @key in object @obj, if
 @key is not present in @obj the returned function will pass the value for
@@ -1116,11 +1120,11 @@ if it doesn&#39;t exist it returns the @key from the default object @def.</p>
         </li>
         
         
-        <li id="section-59">
+        <li id="section-60">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-59">&#182;</a>
+                <a class="pilcrow" href="#section-60">&#182;</a>
               </div>
               <p>Create a chain of validators that will be pulled over a passed @obj,
 returns an empty array or one filled with the messages from the passed
@@ -1144,11 +1148,11 @@ returns an empty array or one filled with the messages from the passed
         </li>
         
         
-        <li id="section-60">
+        <li id="section-61">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-60">&#182;</a>
+                <a class="pilcrow" href="#section-61">&#182;</a>
               </div>
               <p>Create a validator function and the corresponding failure message.</p>
 

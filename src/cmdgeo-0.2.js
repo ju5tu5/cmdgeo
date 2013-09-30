@@ -294,30 +294,24 @@
         cmdgeo.settings.poiMarker.path = google.maps.SymbolPath[cmdgeo.settings.poiMarker.path];
     }
 
+    // Draw the route on the map, this function needs some extra work
     function drawroute() {
+        // Add poi's to the route
         cmdgeo.map.route = _.map(getPoiList(cmdgeo.settings), function (poi) {
             return new google.maps.LatLng(poi.coordinate.latitude, poi.coordinate.longitude);
         });
 
+        // Add markers to the poi's
         cmdgeo.map.markers = _.map(getPoiList(cmdgeo.settings), function (poi, i) {
-            // marker.scale = poi.radius / 3
             return new google.maps.Marker({ position: cmdgeo.map.route[i], map: cmdgeo.map, icon: getPoiMarker(cmdgeo.settings), title: poi.name });
         });
 
-        // TODO: Kleur aanpassen op het huidige punt van de tour
+        // Draw lines between the poi's when this is a lineair route, the lines are as the crow flies
         if(getTourType(cmdgeo.settings) === "LINEAIR"){
-            // Trek lijnen tussen de punten
-            var route = new google.maps.Polyline({
-                clickable: false,
-                map: cmdgeo.map,
-                path: cmdgeo.map.route,
-                strokeColor: 'Black',
-                strokeOpacity: .6,
-                strokeWeight: 3
-            });
-
+            var route = new google.maps.Polyline({ clickable: false, map: cmdgeo.map, path: cmdgeo.map.route, strokeColor: 'Black', strokeOpacity: .6, strokeWeight: 3 });
         }
-        // Voeg de locatie van de persoon door
+
+        // Add the position marker
         cmdgeo.map.pm = new google.maps.Marker({position: getMapOptions(cmdgeo.settings).center, map: cmdgeo.map, icon: getPosMarker(cmdgeo.settings)});
     };
 
