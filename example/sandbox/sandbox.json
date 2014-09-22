@@ -9,7 +9,8 @@
         "scrollwheel": false,
         "mapTypeControl": false,
         "navigationControl": false,
-        "mapTypeId": "ROADMAP"
+        "mapTypeId": "ROADMAP",
+        "styles":[]
     },
     "poiMarker": {
         "path": "CIRCLE",

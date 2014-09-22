@@ -9,7 +9,55 @@
         "scrollwheel": false,
         "mapTypeControl": false,
         "navigationControl": false,
-        "mapTypeId": "ROADMAP"
+        "mapTypeId": "ROADMAP",
+        "styles":[
+          {
+            "featureType": "landscape",
+            "stylers": [
+              { "color": "#62b164" },
+              { "visibility": "on" }
+            ]
+          },{
+            "featureType": "road",
+            "stylers": [
+              { "visibility": "on" },
+              { "color": "#c2c2c2" }
+            ]
+          },{
+            "featureType": "poi",
+            "stylers": [
+              { "visibility": "off" }
+            ]
+          },{
+            "featureType": "administrative",
+            "stylers": [
+              { "visibility": "off" }
+            ]
+          },{
+            "featureType": "water",
+            "elementType": "labels",
+            "stylers": [
+              { "visibility": "off" }
+            ]
+          },{
+            "featureType": "transit",
+            "stylers": [
+              { "visibility": "off" }
+            ]
+          },{
+            "featureType": "road",
+            "elementType": "labels",
+            "stylers": [
+              { "visibility": "off" }
+            ]
+          },{
+            "featureType": "water",
+            "elementType": "labels",
+            "stylers": [
+              { "visibility": "off" }
+            ]
+          }
+        ]
     },
     "poiMarker": {
         "url": "http://cmdgeo.nl/example/map/zombie.png"
